@@ -6,6 +6,7 @@ TestResults/
 *.trx
 *.exe
 *.pdb
+vsix-downloader-linux-x64
 
 # Local IDE state
 .vs/

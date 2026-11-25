@@ -4,7 +4,15 @@
 
 ## Запуск
 
-На **Windows x64** запустите `vsix-downloader.exe` из Проводника или терминала. Можно перенести только этот файл в любую папку. Отдельные DLL и установленный .NET не нужны.
+Скачайте один файл для своей системы из [GitHub Releases](https://github.com/JewishCoder/vsix-downloader/releases). Устанавливать .NET не нужно.
+
+- **Windows x64** — `vsix-downloader-win-x64.exe`, запускается из Проводника или терминала.
+- **Ubuntu x64** — `vsix-downloader-linux-x64`. После скачивания разрешите запуск и откройте файл из терминала:
+
+  ```sh
+  chmod +x vsix-downloader-linux-x64
+  ./vsix-downloader-linux-x64
+  ```
 
 Для запуска из исходников на Windows или Linux нужен [.NET 11 SDK](https://dotnet.microsoft.com/download/dotnet/11.0) и интерактивный терминал.
 
@@ -35,15 +43,16 @@ dotnet run --project src/VsixDownloader
 
 ## Разработка
 
-Сборка автономного EXE для Windows x64 из корня проекта:
+Сборка автономного файла из корня проекта. На Windows используйте профиль `win-x64`, на Ubuntu — `linux-x64`.
 
 ```sh
 dotnet publish src/VsixDownloader -c Release -p:PublishProfile=win-x64
+dotnet publish src/VsixDownloader -c Release -p:PublishProfile=linux-x64
 ```
 
-Готовый файл находится в `src/VsixDownloader/bin/Release/net11.0/win-x64/publish/vsix-downloader.exe`.
+Готовый файл находится в `src/VsixDownloader/bin/Release/net11.0/<платформа>/publish/` и называется `vsix-downloader.exe` на Windows или `vsix-downloader` на Ubuntu.
 
-Среда .NET и библиотеки приложения упакованы в EXE. Если при запуске библиотекам нужна распаковка, .NET делает это автоматически во временном каталоге. Настройки и скачанные VSIX по-прежнему хранятся отдельно от программы.
+Среда .NET и библиотеки приложения упакованы в исполняемый файл. Если при запуске библиотекам нужна распаковка, .NET делает это автоматически во временном каталоге. Настройки и скачанные VSIX по-прежнему хранятся отдельно от программы.
 
 ```sh
 dotnet test VsixDownloader.slnx
@@ -52,3 +61,23 @@ dotnet test VsixDownloader.slnx
 Тесты работают без внешней сети. Для проверки с реальным Marketplace попробуйте расширение с несколькими платформами, например `ms-vscode.cpptools`, одну из его версий и два целевых пакета. Затем прервите одну загрузку и повторите те же параметры, чтобы проверить докачку через свой прокси.
 
 [Архитектура и контракты Microsoft](docs/architecture.md)
+
+## Публикация релиза
+
+На пуше в `main` и в PR тесты выполняются на Windows и Linux. Чтобы выпустить новую версию, поставьте тег на коммит, в котором уже есть workflow релиза, и запушьте тег:
+
+```sh
+git tag -a v0.1.0 -m "Release v0.1.0"
+git push origin v0.1.0
+```
+
+После успешных тестов GitHub Actions берёт версию из тега, собирает и проверяет файлы на Windows и Ubuntu 24.04 и прикладывает к Release два исполняемых файла — `vsix-downloader-win-x64.exe` и `vsix-downloader-linux-x64`. Контрольные суммы SHA-256 проверяются в workflow и отдельно к релизу не прикладываются. Тег с суффиксом, например `v0.1.0-rc.1`, создаёт pre-release. Обычный пуш в `main` не публикует релиз. Токен предоставляется GitHub Actions, отдельный PAT не нужен. EXE пока публикуется без подписи Authenticode.
+
+Чтобы локально подготовить файл для своей ОС без публикации, выберите соответствующую команду и выполните её в PowerShell 7:
+
+```powershell
+./.github/scripts/Build-Release.ps1 -Version 0.1.0 -RuntimeIdentifier win-x64 -OutputDirectory ./src/VsixDownloader/bin/local-release-win-x64
+./.github/scripts/Build-Release.ps1 -Version 0.1.0 -RuntimeIdentifier linux-x64 -OutputDirectory ./src/VsixDownloader/bin/local-release-linux-x64
+```
+
+Скрипт принимает новую или пустую папку. В её подкаталоге `assets` появятся запускаемый файл и служебная контрольная сумма.
