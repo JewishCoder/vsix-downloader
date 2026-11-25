@@ -1,0 +1,25 @@
+# Build and test output
+bin/
+obj/
+/artifacts/
+TestResults/
+*.trx
+*.exe
+*.pdb
+
+# Local IDE state
+.vs/
+*.user
+*.suo
+
+# Downloaded extensions and resume state
+downloads/
+.vsix-downloader/
+*.vsix
+*.vsix.part
+*.vsix.part.json
+*.vsix.lock
+
+# Local signing material
+*.pfx
+*.p12

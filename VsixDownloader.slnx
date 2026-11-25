@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/VsixDownloader/VsixDownloader.csproj" />
+  <Project Path="tests/VsixDownloader.Tests/VsixDownloader.Tests.csproj" />
+</Solution>
